@@ -1,6 +1,16 @@
-import numpy as np
+import torch
 
-def compute_cross_entropy_loss(predicted_probs: np.ndarray, true_labels: np.ndarray, epsilon = 1e-15) -> float:
-    clipped = np.clip(predicted_probs, epsilon, 1-epsilon)
-    result = np.log(clipped) * true_labels
-    return -(np.sum(result, axis=1)).mean()
+def compute_cross_entropy_loss(predicted_probs: torch.Tensor, true_labels: torch.Tensor, epsilon: float = 1e-15) -> float:
+    """Compute average cross-entropy loss for multi-class classification.
+    
+    Args:
+        predicted_probs: Tensor of predicted probabilities (batch_size, num_classes)
+        true_labels: One-hot encoded true labels (batch_size, num_classes)
+        epsilon: Small value for numerical stability
+    
+    Returns:
+        Average cross-entropy loss as a float
+    """
+    clipped_probs = torch.clip(predicted_probs, epsilon, 1-epsilon)
+    probs = torch.log(clipped_probs) * true_labels
+    return -torch.mean(torch.sum(probs, dim=-1)).item()
